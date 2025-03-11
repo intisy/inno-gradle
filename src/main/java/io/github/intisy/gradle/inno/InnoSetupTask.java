@@ -18,7 +18,7 @@ public class InnoSetupTask extends DefaultTask {
     public void createExe() {
         if (fileName != null && name != null) {
             try {
-                File iconFile = icon != null ? new File(icon) : null;
+                File iconFile = icon != null ? getProject().getProjectDir().toPath().resolve(icon).toFile() : null;
                 InnoSetup innoSetup = new InnoSetup(getProject().getBuildDir(), fileName, name, jrePath, iconFile, debug);
                 innoSetup.buildInstaller();
             } catch (IOException | InterruptedException e) {
