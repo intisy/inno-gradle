@@ -1,5 +1,6 @@
 package io.github.intisy.gradle.inno;
 
+import io.github.intisy.gradle.inno.utils.GradleUtils;
 import org.gradle.internal.impldep.com.google.gson.JsonObject;
 import org.gradle.internal.impldep.com.google.gson.JsonParser;
 

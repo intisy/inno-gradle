@@ -1,5 +1,7 @@
 package io.github.intisy.gradle.inno;
 
+import io.github.intisy.gradle.inno.utils.FileUtils;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,16 +15,15 @@ public class InnoSetup {
     private final String jreName;
     private final boolean debug;
 
-    public InnoSetup(File path, String fileName, String name, File icon, boolean copyIcon, boolean debug) throws IOException {
+    public InnoSetup(File path, String fileName, String name, String jrePath, File icon, boolean debug) throws IOException {
         this.path = path;
         this.fileName = "libs\\" + fileName;
         this.name = name;
         this.iconPath = name.toLowerCase().replace(" ", "-") + ".ico";
-        if (copyIcon) {
-            path.toPath().resolve(iconPath).toFile().delete();
-            Files.copy(icon == null ? path.getParentFile().toPath().resolve(iconPath) : icon.toPath(), path.toPath().resolve(iconPath));
+        if (icon != null) {
+            Files.copy(icon.toPath(), path.toPath().resolve(iconPath));
         }
-        this.jreName = "libs\\jre-windows";
+        this.jreName = jrePath;
         this.debug = debug;
     }
 

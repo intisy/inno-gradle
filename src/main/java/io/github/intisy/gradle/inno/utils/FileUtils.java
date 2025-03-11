@@ -1,4 +1,4 @@
-package io.github.intisy.gradle.inno;
+package io.github.intisy.gradle.inno.utils;
 
 import java.io.IOException;
 import java.nio.file.*;

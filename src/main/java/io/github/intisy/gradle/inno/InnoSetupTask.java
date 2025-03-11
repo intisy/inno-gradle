@@ -9,6 +9,7 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class InnoSetupTask extends DefaultTask {
     String fileName;
+    String jrePath = "libs\\jre-windows";
     String name;
     String icon;
     boolean debug;
@@ -17,11 +18,13 @@ public class InnoSetupTask extends DefaultTask {
     public void createExe() {
         if (fileName != null && name != null) {
             try {
-                new InnoSetup(getProject().getBuildDir(), fileName, name, icon != null ? new File(icon) : null, true, debug).buildInstaller();
+                File iconFile = icon != null ? new File(icon) : null;
+                InnoSetup innoSetup = new InnoSetup(getProject().getBuildDir(), fileName, name, jrePath, iconFile, debug);
+                innoSetup.buildInstaller();
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        } else if (debug) {
+        } else {
             System.out.println("Please define 'fileName' and 'name'");
         }
     }
