@@ -11,6 +11,7 @@ public class InnoSetup {
     private final File path;
     private final String fileName;
     private final String iconPath;
+    private final File iconSource;
     private final String name;
     private final String jreName;
     private final boolean debug;
@@ -19,6 +20,7 @@ public class InnoSetup {
         this.path = path;
         this.fileName = "libs\\" + fileName;
         this.name = name;
+        this.iconSource = icon;
         this.iconPath = name.toLowerCase().replace(" ", "-") + ".ico";
         if (icon != null) {
             Files.copy(icon.toPath(), path.toPath().resolve(iconPath));
@@ -64,7 +66,7 @@ public class InnoSetup {
                 "DefaultGroupName=" + name.replace(" ", "") + "\n" +
                 "OutputDir=libs\n" +
                 "OutputBaseFilename=" + name.toLowerCase().replace(" ", "-") + "-installer\n" +
-                "SetupIconFile=" + iconPath + "\n" +
+                (iconSource != null ? "SetupIconFile=" + iconPath + "\n" : "") +
                 "Compression=lzma\n" +
                 "SolidCompression=yes\n" +
                 "\n" +
