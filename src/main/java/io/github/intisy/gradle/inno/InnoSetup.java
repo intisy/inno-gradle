@@ -10,20 +10,21 @@ import java.util.Objects;
 public class InnoSetup {
     private final File path;
     private final String fileName;
-    private final String iconPath;
     private final File iconSource;
     private final String name;
     private final String jreName;
     private final boolean debug;
+    private final Path innoFolder;
 
     public InnoSetup(File path, String fileName, String name, String jrePath, File icon, boolean debug) throws IOException {
         this.path = path;
         this.fileName = "libs\\" + fileName;
         this.name = name;
         this.iconSource = icon;
-        this.iconPath = name.toLowerCase().replace(" ", "-") + ".ico";
+        this.innoFolder = path.toPath().resolve("inno");
+        innoFolder.toFile().delete();
         if (icon != null) {
-            Files.copy(icon.toPath(), path.toPath().resolve(iconPath));
+            Files.copy(icon.toPath(), innoFolder.resolve(iconSource.getName()));
         }
         this.jreName = jrePath;
         this.debug = debug;
@@ -35,8 +36,6 @@ public class InnoSetup {
     }
 
     public void buildInstaller() throws IOException, InterruptedException {
-        Path innoFolder = path.toPath().resolve("inno");
-        innoFolder.toFile().delete();
         GitHub gitHub = new GitHub("https://api.github.com/repos/intisy/InnoSetup/releases/latest", debug);
         FileUtils.copyFolder(Objects.requireNonNull(gitHub.download()), innoFolder);
         File innoSetupCompiler = innoFolder.resolve("ISCC.exe").toFile();
@@ -66,7 +65,7 @@ public class InnoSetup {
                 "DefaultGroupName=" + name.replace(" ", "") + "\n" +
                 "OutputDir=libs\n" +
                 "OutputBaseFilename=" + name.toLowerCase().replace(" ", "-") + "-installer\n" +
-                (iconSource != null ? "SetupIconFile=" + iconPath + "\n" : "") +
+                (iconSource != null ? "SetupIconFile=inno\\" + iconSource.getName() + "\n" : "") +
                 "Compression=lzma\n" +
                 "SolidCompression=yes\n" +
                 "\n" +
