@@ -24,6 +24,7 @@ public class InnoSetup {
         this.innoFolder = path.toPath().resolve("inno");
         innoFolder.toFile().delete();
         if (icon != null) {
+            innoFolder.resolve(iconSource.getName()).toFile().delete();
             Files.copy(icon.toPath(), innoFolder.resolve(iconSource.getName()));
         }
         this.jreName = jrePath;
