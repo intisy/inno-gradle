@@ -22,11 +22,6 @@ public class InnoSetup {
         this.name = name;
         this.iconSource = icon;
         this.innoFolder = path.toPath().resolve("inno");
-        innoFolder.toFile().delete();
-        if (icon != null) {
-            innoFolder.resolve(iconSource.getName()).toFile().delete();
-            Files.copy(icon.toPath(), innoFolder.resolve(iconSource.getName()));
-        }
         this.jreName = jrePath;
         this.debug = debug;
     }
@@ -38,7 +33,12 @@ public class InnoSetup {
 
     public void buildInstaller() throws IOException, InterruptedException {
         GitHub gitHub = new GitHub("https://api.github.com/repos/intisy/InnoSetup/releases/latest", debug);
+        innoFolder.toFile().delete();
         FileUtils.copyFolder(Objects.requireNonNull(gitHub.download()), innoFolder);
+        if (iconSource != null) {
+            innoFolder.resolve(iconSource.getName()).toFile().delete();
+            Files.copy(iconSource.toPath(), innoFolder.resolve(iconSource.getName()));
+        }
         File innoSetupCompiler = innoFolder.resolve("ISCC.exe").toFile();
         File scriptPath = path.toPath().resolve("build.iss").toFile();
         createInnoSetupScript(scriptPath);
