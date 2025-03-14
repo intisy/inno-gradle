@@ -51,7 +51,7 @@ public class InnoSetup {
 
     public void buildInstaller() throws IOException, InterruptedException {
         GitHub gitHub = new GitHub("https://api.github.com/repos/intisy/InnoSetup/releases/latest", debug);
-        innoBuildPath.toFile().delete();
+        FileUtils.deleteFolder(innoBuildPath);
         FileUtils.copyFolder(Objects.requireNonNull(gitHub.download()), innoBuildPath);
         File innoSetupCompiler = innoBuildPath.resolve("ISCC.exe").toFile();
         File scriptPath = innoBuildPath.resolve("build.iss").toFile();
@@ -73,7 +73,6 @@ public class InnoSetup {
     }
 
     public void copySourceFiles() throws IOException {
-        innoBuildSourcePath.toFile().delete();
         innoBuildSourcePath.toFile().mkdirs();
         Files.copy(inputFile.toPath(), innoBuildSourcePath.resolve(inputFile.getName()));
         FileUtils.copyFolder(jrePath, innoBuildSourcePath.resolve("jre"));
