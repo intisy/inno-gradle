@@ -8,21 +8,39 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 public class InnoSetup {
-    private final File path;
-    private final String fileName;
-    private final File iconSource;
+    private final File inputFile;
+    private final File outputFile;
     private final String name;
-    private final String jreName;
-    private final boolean debug;
-    private final Path innoFolder;
+    private final String safeName;
+    private final Path innoBuildPath;
+    private final Path innoBuildSourcePath;
+    private File iconFile;
+    private String version = "1.0";
+    private Path jrePath;
+    private boolean debug;
 
-    public InnoSetup(File path, String fileName, String name, String jrePath, File icon, boolean debug) throws IOException {
-        this.path = path;
-        this.fileName = "libs\\" + fileName;
+    public InnoSetup(File path, File inputFile, File outputFile, String name) {
+        this.inputFile = inputFile;
+        this.outputFile = outputFile;
         this.name = name;
-        this.iconSource = icon;
-        this.innoFolder = path.toPath().resolve("inno");
-        this.jreName = jrePath;
+        this.innoBuildPath = path.toPath().resolve("inno");
+        this.innoBuildSourcePath = innoBuildPath.resolve("source");
+        this.safeName = name.replace(" ", "-");
+    }
+
+    public void setIconFile(File iconFile) {
+        this.iconFile = iconFile;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public void setJrePath(Path jrePath) {
+        this.jrePath = jrePath;
+    }
+
+    public void setDebug(boolean debug) {
         this.debug = debug;
     }
 
@@ -33,20 +51,14 @@ public class InnoSetup {
 
     public void buildInstaller() throws IOException, InterruptedException {
         GitHub gitHub = new GitHub("https://api.github.com/repos/intisy/InnoSetup/releases/latest", debug);
-        innoFolder.toFile().delete();
-        FileUtils.copyFolder(Objects.requireNonNull(gitHub.download()), innoFolder);
-        if (iconSource != null) {
-            innoFolder.resolve(iconSource.getName()).toFile().delete();
-            Files.copy(iconSource.toPath(), innoFolder.resolve(iconSource.getName()));
-        }
-        File innoSetupCompiler = innoFolder.resolve("ISCC.exe").toFile();
-        File scriptPath = path.toPath().resolve("build.iss").toFile();
+        innoBuildPath.toFile().delete();
+        FileUtils.copyFolder(Objects.requireNonNull(gitHub.download()), innoBuildPath);
+        File innoSetupCompiler = innoBuildPath.resolve("ISCC.exe").toFile();
+        File scriptPath = innoBuildPath.resolve("build.iss").toFile();
+        copySourceFiles();
         createInnoSetupScript(scriptPath);
-        log("Starting Inno Setup script " + scriptPath.getAbsolutePath() + " using " + innoSetupCompiler.getAbsolutePath());
-        File output = path.toPath().resolve("libs").resolve(name.toLowerCase().replace(" ", "-") + "-installer.exe").toFile();
-        output.delete();
         ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", innoSetupCompiler.getAbsolutePath() + " " + scriptPath.getAbsolutePath());
-        processBuilder.redirectErrorStream(true); // Combine standard and error output
+        processBuilder.redirectErrorStream(true);
         Process process = processBuilder.start();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
@@ -55,33 +67,41 @@ public class InnoSetup {
             }
         }
         process.waitFor();
+        Files.copy(innoBuildPath.resolve("output").resolve(outputFile.getName()), outputFile.toPath());
         log("Process finished with exit code: " + process.exitValue());
+    }
+
+    public void copySourceFiles() throws IOException {
+        Files.copy(inputFile.toPath(), innoBuildSourcePath.resolve(inputFile.getName()));
+        FileUtils.copyFolder(jrePath, innoBuildSourcePath.resolve("jre"));
+        if (iconFile != null)
+            Files.copy(iconFile.toPath(), innoBuildSourcePath.resolve(iconFile.getName()));
     }
 
     public void createInnoSetupScript(File scriptPath) throws IOException {
         String scriptContent = "[Setup]\n" +
                 "AppName=" + name + "\n" +
-                "AppVersion=1.0\n" +
-                "DefaultDirName={pf}\\" + name.replace(" ", "") + "\n" +
-                "DefaultGroupName=" + name.replace(" ", "") + "\n" +
-                "OutputDir=libs\n" +
-                "OutputBaseFilename=" + name.toLowerCase().replace(" ", "-") + "-installer\n" +
-                (iconSource != null ? "SetupIconFile=inno\\" + iconSource.getName() + "\n" : "") +
+                "AppVersion=" + version + "\n" +
+                "DefaultDirName={pf}\\" + safeName + "\n" +
+                "DefaultGroupName=" + safeName + "\n" +
+                "OutputDir=output\n" +
+                "OutputBaseFilename=" + outputFile.getName() + "\n" +
+                (iconFile != null ? "SetupIconFile=source\\" + iconFile.getName() + "\n" : "") +
                 "Compression=lzma\n" +
                 "SolidCompression=yes\n" +
                 "\n" +
                 "[Files]\n" +
                 "; Add executable and JRE files\n" +
-                "Source: \"" + fileName + "\"; DestDir: \"{app}\"; Flags: ignoreversion\n" +
-                "Source: \"" + jreName + "\\*\"; DestDir: \"{app}\\jre\"; Flags: recursesubdirs\n" +
+                "Source: \"source\\" + inputFile.getName() + "\"; DestDir: \"{app}\"; Flags: ignoreversion\n" +
+                "Source: \"source\\jre\\*\"; DestDir: \"{app}\\jre\"; Flags: recursesubdirs\n" +
                 "\n" +
                 "[Icons]\n" +
                 "; Create desktop shortcut\n" +
-                "Name: \"{commondesktop}\\" + name + "\"; Filename: \"{app}\\" + name.replace(" ", "") + ".exe\"\n" +
+                "Name: \"{commondesktop}\\" + name + "\"; Filename: \"{app}\\" + safeName + ".exe\"\n" +
                 "\n" +
                 "[Run]\n" +
                 "; Run the application after installation\n" +
-                "Filename: \"{app}\\" + name.replace(" ", "") + ".exe\"; Description: \"Launch " + name + "\"; Flags: nowait postinstall skipifsilent\n";
+                "Filename: \"{app}\\" + safeName + ".exe\"; Description: \"Launch " + name + "\"; Flags: nowait postinstall skipifsilent\n";
         scriptPath.delete();
         try (FileWriter writer = new FileWriter(scriptPath)) {
             writer.write(scriptContent);
