@@ -53,6 +53,7 @@ public class InnoSetup {
         GitHub gitHub = new GitHub("https://api.github.com/repos/intisy/InnoSetup/releases/latest", debug);
         innoBuildPath.toFile().delete();
         FileUtils.copyFolder(Objects.requireNonNull(gitHub.download()), innoBuildPath);
+        innoBuildSourcePath.toFile().mkdirs();
         File innoSetupCompiler = innoBuildPath.resolve("ISCC.exe").toFile();
         File scriptPath = innoBuildPath.resolve("build.iss").toFile();
         copySourceFiles();
