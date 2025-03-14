@@ -68,7 +68,8 @@ public class InnoSetup {
             }
         }
         process.waitFor();
-        Files.copy(innoBuildPath.resolve("output").resolve(outputFile.getName()), outputFile.toPath());
+        Path outputPath = innoBuildPath.resolve("output");
+        Files.copy(outputPath.resolve(outputFile.getName()), outputFile.toPath());
         log("Process finished with exit code: " + process.exitValue());
     }
 
@@ -86,7 +87,7 @@ public class InnoSetup {
                 "DefaultDirName={pf}\\" + safeName + "\n" +
                 "DefaultGroupName=" + safeName + "\n" +
                 "OutputDir=output\n" +
-                "OutputBaseFilename=" + outputFile.getName() + "\n" +
+                "OutputBaseFilename=" + outputFile.getName().split("\\.")[0] + "\n" +
                 (iconFile != null ? "SetupIconFile=source\\" + iconFile.getName() + "\n" : "") +
                 "Compression=lzma\n" +
                 "SolidCompression=yes\n" +
