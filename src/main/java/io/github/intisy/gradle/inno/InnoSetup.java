@@ -17,6 +17,7 @@ public class InnoSetup {
     private File iconFile;
     private String version = "1.0";
     private Path jrePath;
+    private boolean autoStart;
     private boolean debug;
 
     public InnoSetup(File path, File inputFile, File outputFile, String name) {
@@ -26,6 +27,10 @@ public class InnoSetup {
         this.innoBuildPath = path.toPath().resolve("inno");
         this.innoBuildSourcePath = innoBuildPath.resolve("source");
         this.safeName = name.replace(" ", "-");
+    }
+
+    public void setAutoStart(boolean autoStart) {
+        this.autoStart = autoStart;
     }
 
     public void setIconFile(File iconFile) {
@@ -101,6 +106,7 @@ public class InnoSetup {
                 "[Icons]\n" +
                 "; Create desktop shortcut\n" +
                 "Name: \"{commondesktop}\\" + name + "\"; Filename: \"{app}\\" + safeName + ".exe\"\n" +
+                (autoStart ? "Name: \"{userstartup}\\" + name + "\"; Filename: \"{app}\\" + safeName + ".exe\"; Parameters: \"/auto\"\n" : "") +
                 "\n" +
                 "[Run]\n" +
                 "; Run the application after installation\n" +
