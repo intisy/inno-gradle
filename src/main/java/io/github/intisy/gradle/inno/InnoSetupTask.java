@@ -16,7 +16,8 @@ public class InnoSetupTask extends DefaultTask {
     String icon;
     String version;
     Path jrePath;
-    boolean debug = false;
+    boolean autoStart;
+    boolean debug;
 
     @TaskAction
     public void createExe() {
@@ -31,6 +32,7 @@ public class InnoSetupTask extends DefaultTask {
                 }
                 if (version != null)
                     innoSetup.setVersion(version);
+                innoSetup.setAutoStart(autoStart);
                 innoSetup.setJrePath(jrePath);
                 innoSetup.buildInstaller();
             } catch (IOException | InterruptedException e) {
