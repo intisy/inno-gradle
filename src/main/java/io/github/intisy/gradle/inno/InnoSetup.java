@@ -68,6 +68,7 @@ public class InnoSetup {
         }
         process.waitFor();
         Path outputPath = innoBuildPath.resolve("output");
+        outputFile.delete();
         Files.copy(outputPath.resolve(outputFile.getName()), outputFile.toPath());
         log("Process finished with exit code: " + process.exitValue());
     }
