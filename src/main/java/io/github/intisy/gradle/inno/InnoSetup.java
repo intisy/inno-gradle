@@ -5,6 +5,7 @@ import io.github.intisy.gradle.inno.utils.FileUtils;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 public class InnoSetup {
@@ -17,6 +18,8 @@ public class InnoSetup {
     private File iconFile;
     private String version = "1.0";
     private Path jrePath;
+    private List<String> autoStartParameters;
+    private List<String> parameters;
     private boolean autoStart;
     private boolean debug;
 
@@ -49,6 +52,14 @@ public class InnoSetup {
         this.debug = debug;
     }
 
+    public void setAutoStartParameters(List<String> autoStartParameters) {
+        this.autoStartParameters = autoStartParameters;
+    }
+
+    public void setParameters(List<String> parameters) {
+        this.parameters = parameters;
+    }
+
     public void log(String log) {
         if (debug)
             System.out.println(log);
@@ -73,13 +84,13 @@ public class InnoSetup {
         }
         process.waitFor();
         Path outputPath = innoBuildPath.resolve("output");
-        outputFile.delete();
+        FileUtils.delete(outputFile);
         Files.copy(outputPath.resolve(outputFile.getName()), outputFile.toPath());
         log("Process finished with exit code: " + process.exitValue());
     }
 
     public void copySourceFiles() throws IOException {
-        innoBuildSourcePath.toFile().mkdirs();
+        FileUtils.mkdirs(innoBuildSourcePath.toFile());
         Files.copy(inputFile.toPath(), innoBuildSourcePath.resolve(inputFile.getName()));
         FileUtils.copyFolder(jrePath, innoBuildSourcePath.resolve("jre"));
         if (iconFile != null)
@@ -105,13 +116,13 @@ public class InnoSetup {
                 "\n" +
                 "[Icons]\n" +
                 "; Create desktop shortcut\n" +
-                "Name: \"{commondesktop}\\" + name + "\"; Filename: \"{app}\\" + safeName + ".exe\"\n" +
-                (autoStart ? "Name: \"{userstartup}\\" + name + "\"; Filename: \"{app}\\" + safeName + ".exe\"; Parameters: \"/auto\"\n" : "") +
+                "Name: \"{commondesktop}\\" + name + "\"" + (parameters != null ? "Parameters: \"" + String.join(" ", parameters) + "\"; " : "") +  "; Filename: \"{app}\\" + safeName + ".exe\"\n" +
+                (autoStart ? "Name: \"{userstartup}\\" + name + "\"; " + (autoStartParameters != null ? "Parameters: \"" + String.join(" ", autoStartParameters) + "\"; " : "") +  "Filename: \"{app}\\" + safeName + ".exe\"; Parameters: \"/auto\"\n" : "") +
                 "\n" +
                 "[Run]\n" +
                 "; Run the application after installation\n" +
                 "Filename: \"{app}\\" + safeName + ".exe\"; Description: \"Launch " + name + "\"; Flags: nowait postinstall skipifsilent\n";
-        scriptPath.delete();
+        FileUtils.delete(scriptPath);
         try (FileWriter writer = new FileWriter(scriptPath)) {
             writer.write(scriptContent);
         }

@@ -1,5 +1,6 @@
 package io.github.intisy.gradle.inno.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -22,6 +23,22 @@ public class FileUtils {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    public static void delete(File file) {
+        if (file.exists() && !file.delete()) {
+            throw new RuntimeException("Failed to delete file: " + file.getAbsolutePath());
+        }
+    }
+
+    public static void mkdirs(Path path) {
+        mkdirs(path.toFile());
+    }
+
+    public static void mkdirs(File file) {
+        if (!file.exists() && !file.mkdirs()) {
+            throw new RuntimeException("Failed to create directories: " + file.getAbsolutePath());
+        }
     }
 
     public static void deleteFolder(Path path) throws IOException {
