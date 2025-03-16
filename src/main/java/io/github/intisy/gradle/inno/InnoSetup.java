@@ -117,7 +117,7 @@ public class InnoSetup {
                 "[Icons]\n" +
                 "; Create desktop shortcut\n" +
                 "Name: \"{commondesktop}\\" + name + "\"; Filename: \"{app}\\" + safeName + ".exe\"\n" +
-                (autoStart ? "Name: \"{userstartup}\\" + name + "\"; Filename: \"{app}\\" + safeName + ".exe\"; " + (parameters != null ? "Parameters: \"" + String.join(" ", parameters) + "\"; " : "") +  "\n" : "") +
+                (autoStart ? "Name: \"{userstartup}\\" + name + "\"; Filename: \"{app}\\" + safeName + ".exe\"; Parameters: \"/auto" + (autoStartParameters != null ? " " + String.join(" ", autoStartParameters) : "") +  "\"\n" : "") +
                 "\n" +
                 "[Run]\n" +
                 "; Run the application after installation\n" +
