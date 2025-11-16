@@ -1,5 +1,6 @@
-package io.github.intisy.gradle.inno;
+package io.github.intisy.gradle.inno.impl;
 
+import io.github.intisy.gradle.inno.GitHub;
 import io.github.intisy.gradle.inno.utils.FileUtils;
 
 import java.io.*;
@@ -8,6 +9,13 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Orchestrates preparing sources and invoking Inno Setup to build a Windows installer.
+ *
+ * <p>Handles copying inputs (executable, JRE, optional icon), generating the
+ * Inno Setup script, downloading the tool (cached under Gradle home), and
+ * executing the compiler to produce the final installer.</p>
+ */
 public class InnoSetup {
     private final File inputFile;
     private final File outputFile;
@@ -15,6 +23,7 @@ public class InnoSetup {
     private final String safeName;
     private final Path innoBuildPath;
     private final Path innoBuildSourcePath;
+
     private File iconFile;
     private String version = "1.0";
     private Path jrePath;
@@ -23,6 +32,14 @@ public class InnoSetup {
     private boolean autoStart;
     private boolean debug;
 
+    /**
+     * Creates a new InnoSetup helper bound to the given project build path and inputs.
+     *
+     * @param path project build directory
+     * @param inputFile the application executable to package
+     * @param outputFile the resulting installer file destination
+     * @param name application display name
+     */
     public InnoSetup(File path, File inputFile, File outputFile, String name) {
         this.inputFile = inputFile;
         this.outputFile = outputFile;
@@ -32,39 +49,85 @@ public class InnoSetup {
         this.safeName = name.replace(" ", "-");
     }
 
+    /**
+     * Enables or disables creating a Startup entry to auto-launch the app after login.
+     *
+     * @param autoStart true to add a Startup shortcut, false otherwise
+     */
     public void setAutoStart(boolean autoStart) {
         this.autoStart = autoStart;
     }
 
+    /**
+     * Sets an optional icon file for the installer and shortcuts.
+     *
+     * @param iconFile ICO file to use as setup icon
+     */
     public void setIconFile(File iconFile) {
         this.iconFile = iconFile;
     }
 
+    /**
+     * Sets the application version written to the installer metadata.
+     *
+     * @param version version string (e.g., 1.2.3)
+     */
     public void setVersion(String version) {
         this.version = version;
     }
 
+    /**
+     * Sets the path to a bundled JRE to include in the installer.
+     *
+     * @param jrePath path to the JRE directory
+     */
     public void setJrePath(Path jrePath) {
         this.jrePath = jrePath;
     }
 
+    /**
+     * Enables debug logging of the Inno Setup process output.
+     *
+     * @param debug true to print logs, false to silence
+     */
     public void setDebug(boolean debug) {
         this.debug = debug;
     }
 
+    /**
+     * Sets optional parameters passed to the app when launched from Startup.
+     *
+     * @param autoStartParameters list of parameters, or null for none
+     */
     public void setAutoStartParameters(List<String> autoStartParameters) {
         this.autoStartParameters = autoStartParameters;
     }
 
+    /**
+     * Sets optional parameters passed to the app when launched post-install.
+     *
+     * @param parameters list of parameters, or null for none
+     */
     public void setParameters(List<String> parameters) {
         this.parameters = parameters;
     }
 
+    /**
+     * Logs a message if debug mode is enabled.
+     *
+     * @param log message to print
+     */
     public void log(String log) {
         if (debug)
             System.out.println(log);
     }
 
+    /**
+     * Builds the installer by preparing sources, generating the script, and invoking Inno Setup.
+     *
+     * @throws IOException if file operations fail
+     * @throws InterruptedException if the external process is interrupted
+     */
     public void buildInstaller() throws IOException, InterruptedException {
         GitHub gitHub = new GitHub("https://api.github.com/repos/intisy/InnoSetup/releases/latest", debug);
         FileUtils.deleteFolder(innoBuildPath);
@@ -89,6 +152,11 @@ public class InnoSetup {
         log("Process finished with exit code: " + process.exitValue());
     }
 
+    /**
+     * Copies input executable, JRE, and optional icon into the build source directory.
+     *
+     * @throws IOException if copy operations fail
+     */
     public void copySourceFiles() throws IOException {
         FileUtils.mkdirs(innoBuildSourcePath.toFile());
         Files.copy(inputFile.toPath(), innoBuildSourcePath.resolve(inputFile.getName()));
@@ -97,6 +165,12 @@ public class InnoSetup {
             Files.copy(iconFile.toPath(), innoBuildSourcePath.resolve(iconFile.getName()));
     }
 
+    /**
+     * Creates the Inno Setup script file used by the compiler.
+     *
+     * @param scriptPath output path for the generated .iss script
+     * @throws IOException if writing the file fails
+     */
     public void createInnoSetupScript(File scriptPath) throws IOException {
         String scriptContent = "[Setup]\n" +
                 "AppName=" + name + "\n" +
