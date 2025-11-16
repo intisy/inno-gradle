@@ -1,6 +1,5 @@
 package io.github.intisy.gradle.inno.impl;
 
-import io.github.intisy.gradle.inno.GitHub;
 import io.github.intisy.gradle.inno.utils.FileUtils;
 
 import java.io.*;

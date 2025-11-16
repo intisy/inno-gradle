@@ -4,6 +4,11 @@ import io.github.intisy.gradle.inno.impl.InnoSetup;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -114,6 +119,7 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the executable file name to package
      */
+    @Input
     public String getFileName() {
         return fileName;
     }
@@ -121,6 +127,7 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the application display name
      */
+    @Input
     public String getName() {
         return name;
     }
@@ -128,6 +135,8 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the optional icon path relative to the project, or null
      */
+    @Optional
+    @Input
     public String getIcon() {
         return icon;
     }
@@ -135,6 +144,8 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the application version string
      */
+    @Optional
+    @Input
     public String getVersion() {
         return version;
     }
@@ -142,6 +153,8 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return parameters for Startup shortcut or null
      */
+    @Optional
+    @Input
     public List<String> getAutoStartParameters() {
         return autoStartParameters;
     }
@@ -149,6 +162,8 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return parameters passed when launching after install or null
      */
+    @Optional
+    @Input
     public List<String> getParameters() {
         return parameters;
     }
@@ -156,6 +171,8 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the JRE folder path to bundle
      */
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
     public Path getJrePath() {
         return jrePath;
     }
@@ -163,6 +180,7 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return true if a Startup shortcut should be created
      */
+    @Input
     public boolean isAutoStart() {
         return autoStart;
     }
@@ -170,6 +188,7 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return true if debug logging is enabled
      */
+    @Input
     public boolean isDebug() {
         return debug;
     }
