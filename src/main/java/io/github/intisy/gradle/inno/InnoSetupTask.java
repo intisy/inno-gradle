@@ -127,6 +127,7 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the application display name
      */
+    @NotNull
     @Input
     public String getName() {
         return name;
@@ -231,9 +232,18 @@ public class InnoSetupTask extends DefaultTask {
      * @return configured {@code InnoSetup} instance
      * @throws IOException if build directories cannot be resolved
      */
-    private @NotNull InnoSetup getInnoSetup() throws IOException {
-        File buildDir = getProject().getBuildDir();
+    @NotNull
+    private InnoSetup getInnoSetup() throws IOException {
+        File buildDir = getProject().getLayout().getBuildDirectory().getAsFile().get();
         Path libDir = buildDir.toPath().resolve("libs");
-        return new InnoSetup(buildDir, libDir.resolve(fileName).toFile(), libDir.resolve(name.toLowerCase().replace(" ", "-") + "-installer.exe").toFile(), name);
+        Logger logger = new Logger(this, getProject());
+
+        return new InnoSetup(
+                buildDir,
+                libDir.resolve(fileName).toFile(),
+                libDir.resolve(name.toLowerCase().replace(" ", "-") + "-installer.exe").toFile(),
+                name,
+                logger
+        );
     }
 }

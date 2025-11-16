@@ -1,5 +1,6 @@
 package io.github.intisy.gradle.inno.impl;
 
+import io.github.intisy.gradle.inno.Logger;
 import io.github.intisy.gradle.inno.utils.FileUtils;
 
 import java.io.*;
@@ -30,6 +31,7 @@ public class InnoSetup {
     private List<String> parameters;
     private boolean autoStart;
     private boolean debug;
+    private final Logger logger;
 
     /**
      * Creates a new InnoSetup helper bound to the given project build path and inputs.
@@ -39,13 +41,14 @@ public class InnoSetup {
      * @param outputFile the resulting installer file destination
      * @param name application display name
      */
-    public InnoSetup(File path, File inputFile, File outputFile, String name) {
+    public InnoSetup(File path, File inputFile, File outputFile, String name, Logger logger) {
         this.inputFile = inputFile;
         this.outputFile = outputFile;
         this.name = name;
         this.innoBuildPath = path.toPath().resolve("inno");
         this.innoBuildSourcePath = innoBuildPath.resolve("source");
         this.safeName = name.replace(" ", "-");
+        this.logger = logger;
     }
 
     /**
@@ -128,7 +131,7 @@ public class InnoSetup {
      * @throws InterruptedException if the external process is interrupted
      */
     public void buildInstaller() throws IOException, InterruptedException {
-        GitHub gitHub = new GitHub("https://api.github.com/repos/intisy/InnoSetup/releases/latest", debug);
+        GitHub gitHub = new GitHub("https://api.github.com/repos/intisy/InnoSetup/releases/latest", logger);
         FileUtils.deleteFolder(innoBuildPath);
         FileUtils.copyFolder(Objects.requireNonNull(gitHub.download()), innoBuildPath);
         File innoSetupCompiler = innoBuildPath.resolve("ISCC.exe").toFile();
