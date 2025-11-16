@@ -2,7 +2,7 @@
 
 Archives containing JAR files are available as [releases](https://github.com/intisy/inno-gradle/releases).
 
-## What is Online Gradle?
+## What is inno-gradle?
 
 inno-gradle lets you automatically use InnoSetup from gradle
 
@@ -12,7 +12,7 @@ Using the plugins DSL:
 
 ```groovy
 plugins {
-    id "io.github.intisy.inno-gradle" version "1.6.1.3"
+    id "io.github.intisy.inno-gradle" version "1.6.2.1"
 }
 ```
 
@@ -26,7 +26,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "io.github.intisy.inno-gradle:1.6.1.3"
+        classpath "io.github.intisy.inno-gradle:1.6.2.1"
     }
 }
 
