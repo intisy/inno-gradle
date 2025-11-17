@@ -12,7 +12,7 @@ Using the plugins DSL:
 
 ```groovy
 plugins {
-    id "io.github.intisy.inno-gradle" version "1.6.4"
+    id "io.github.intisy.inno-gradle" version "1.6.4.1"
 }
 ```
 
@@ -26,7 +26,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "io.github.intisy.inno-gradle:1.6.4"
+        classpath "io.github.intisy.inno-gradle:1.6.4.1"
     }
 }
 
@@ -39,7 +39,8 @@ Once you have the plugin installed you can use it like so:
 import io.github.intisy.gradle.inno.InnoSetupTask
 
 tasks.register("createInstaller", InnoSetupTask) {
-   fileName = artifact_name + "-" + platformArch + "-installer.exe"
+   infile = artifact_name + "-" + platformArch + "-obfuscated.exe"
+   outfile = artifact_name + "-" + platformArch + "-installer.exe"
    name = artifact_name
    version = project.version
    icon = "${projectDir}/icon.ico"
