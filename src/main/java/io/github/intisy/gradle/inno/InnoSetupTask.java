@@ -25,6 +25,9 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class InnoSetupTask extends DefaultTask {
+    private final Logger logger = new Logger(this, getProject());
+
+    String infile;
     String outfile;
     String name;
     String icon;
@@ -34,6 +37,15 @@ public class InnoSetupTask extends DefaultTask {
     List<String> parameters;
     boolean autoStart;
     boolean debug;
+
+    /**
+     * Sets the file name of the application executable to package.
+     *
+     * @param infile executable file name under build/libs
+     */
+    public void setInfile(String infile) {
+        this.infile = infile;
+    }
 
     /**
      * Sets the file name of the application executable to package.
@@ -119,9 +131,19 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the executable file name to package
      */
+    @Optional
     @Input
     public String getOutfile() {
         return outfile;
+    }
+
+    /**
+     * @return the executable file name to package (preferred over outfile if set)
+     */
+    @Optional
+    @Input
+    public String getInfile() {
+        return infile;
     }
 
     /**
@@ -202,17 +224,34 @@ public class InnoSetupTask extends DefaultTask {
      */
     @TaskAction
     public void createExe() {
-        if (outfile != null && name != null && jrePath != null) {
+        if ((infile != null || outfile != null) && name != null && jrePath != null) {
             try {
                 InnoSetup innoSetup = getInnoSetup();
                 LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
                 innoSetup.setDebug(debug || logLevel.equals(LogLevel.INFO) || logLevel.equals(LogLevel.DEBUG));
+                File buildDir = getProject().getLayout().getBuildDirectory().getAsFile().get();
+                Path libDir = buildDir.toPath().resolve("libs");
+
                 if (icon != null) {
                     File iconFile = getProject().getProjectDir().toPath().resolve(icon).toFile();
                     innoSetup.setIconFile(iconFile);
                 }
+
                 if (version != null)
                     innoSetup.setVersion(version);
+
+                if (infile == null) {
+                    infile = name.toLowerCase().replace(" ", "-") + ".exe";
+                }
+
+                if (outfile == null) {
+                    outfile = name.toLowerCase().replace(" ", "-") + "-installer.exe";
+                }
+
+                innoSetup.setName(name);
+                innoSetup.setInnoBuildPath(buildDir.toPath().resolve("inno"));
+                innoSetup.setInputFile(libDir.resolve(infile).toFile());
+                innoSetup.setInputFile(libDir.resolve(outfile).toFile());
                 innoSetup.setAutoStart(autoStart);
                 innoSetup.setJrePath(new File(jrePath).toPath());
                 innoSetup.setParameters(parameters);
@@ -234,16 +273,6 @@ public class InnoSetupTask extends DefaultTask {
      */
     @NotNull
     private InnoSetup getInnoSetup() throws IOException {
-        File buildDir = getProject().getLayout().getBuildDirectory().getAsFile().get();
-        Path libDir = buildDir.toPath().resolve("libs");
-        Logger logger = new Logger(this, getProject());
-
-        return new InnoSetup(
-                buildDir,
-                libDir.resolve(outfile).toFile(),
-                libDir.resolve(name.toLowerCase().replace(" ", "-") + "-installer.exe").toFile(),
-                name,
-                logger
-        );
+        return new InnoSetup(logger);
     }
 }

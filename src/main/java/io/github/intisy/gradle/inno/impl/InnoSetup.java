@@ -17,13 +17,12 @@ import java.util.Objects;
  * executing the compiler to produce the final installer.</p>
  */
 public class InnoSetup {
-    private final File inputFile;
-    private final File outputFile;
-    private final String name;
-    private final String safeName;
-    private final Path innoBuildPath;
-    private final Path innoBuildSourcePath;
-
+    private String name;
+    private String safeName;
+    private Path innoBuildPath;
+    private Path innoBuildSourcePath;
+    private File inputFile;
+    private File outputFile;
     private File iconFile;
     private String version = "1.0";
     private Path jrePath;
@@ -36,19 +35,48 @@ public class InnoSetup {
     /**
      * Creates a new InnoSetup helper bound to the given project build path and inputs.
      *
-     * @param path project build directory
-     * @param inputFile the application executable to package
-     * @param outputFile the resulting installer file destination
+     * @param logger logger to use for logging messages
+     */
+    public InnoSetup(Logger logger) {
+        this.logger = logger;
+    }
+
+    /**
+     * Sets the application display name.
+     *
      * @param name application display name
      */
-    public InnoSetup(File path, File inputFile, File outputFile, String name, Logger logger) {
-        this.inputFile = inputFile;
-        this.outputFile = outputFile;
+    public void setName(String name) {
         this.name = name;
-        this.innoBuildPath = path.toPath().resolve("inno");
-        this.innoBuildSourcePath = innoBuildPath.resolve("source");
         this.safeName = name.replace(" ", "-");
-        this.logger = logger;
+    }
+
+    /**
+     * Sets the Inno Setup build directory.
+     *
+     * @param innoBuildPath Inno Setup build directory
+     */
+    public void setInnoBuildPath(Path innoBuildPath) {
+        this.innoBuildPath = innoBuildPath;
+        this.innoBuildSourcePath = innoBuildPath.resolve("source");
+    }
+
+    /**
+     * Sets the application executable to package.
+     *
+     * @param inputFile executable file to package
+     */
+    public void setInputFile(File inputFile) {
+        this.inputFile = inputFile;
+    }
+
+    /**
+     * Sets the resulting installer file destination.
+     *
+     * @param outputFile installer file destination
+     */
+    public void setOutputFile(File outputFile) {
+        this.outputFile = outputFile;
     }
 
     /**
