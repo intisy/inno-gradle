@@ -26,8 +26,8 @@ public class InnoSetupTask extends DefaultTask {
     String infile;
     String outfile;
     String appName;
-    String icon;
-    String version;
+    String appIcon;
+    String appVersion;
     String jrePath;
     List<String> autoStartParameters;
     List<String> parameters;
@@ -64,19 +64,19 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * Sets an optional icon file path (relative to project dir) for the installer and shortcuts.
      *
-     * @param icon relative path to an .ico file
+     * @param appIcon relative path to an .ico file
      */
-    public void setIcon(String icon) {
-        this.icon = icon;
+    public void setAppIcon(String appIcon) {
+        this.appIcon = appIcon;
     }
 
     /**
      * Sets the application version recorded in the installer metadata.
      *
-     * @param version version string (e.g., 1.2.3)
+     * @param appVersion version string (e.g., 1.2.3)
      */
-    public void setVersion(String version) {
-        this.version = version;
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
     }
 
     /**
@@ -156,8 +156,8 @@ public class InnoSetupTask extends DefaultTask {
      */
     @Optional
     @Input
-    public String getIcon() {
-        return icon;
+    public String getAppIcon() {
+        return appIcon;
     }
 
     /**
@@ -165,8 +165,8 @@ public class InnoSetupTask extends DefaultTask {
      */
     @Optional
     @Input
-    public String getVersion() {
-        return version;
+    public String getAppVersion() {
+        return appVersion;
     }
 
     /**
@@ -231,13 +231,13 @@ public class InnoSetupTask extends DefaultTask {
             File buildDir = getProject().getLayout().getBuildDirectory().getAsFile().get();
             Path libDir = buildDir.toPath().resolve("libs");
 
-            if (icon != null) {
-                File iconFile = getProject().getProjectDir().toPath().resolve(icon).toFile();
+            if (appIcon != null) {
+                File iconFile = getProject().getProjectDir().toPath().resolve(appIcon).toFile();
                 innoSetup.setIconFile(iconFile);
             }
 
-            if (version != null)
-                innoSetup.setVersion(version);
+            if (appVersion != null)
+                innoSetup.setVersion(appVersion);
 
             if (infile == null) {
                 infile = appName.toLowerCase().replace(" ", "-") + ".exe";
@@ -254,7 +254,7 @@ public class InnoSetupTask extends DefaultTask {
             innoSetup.setName(appName);
             innoSetup.setInnoBuildPath(buildDir.toPath().resolve("inno"));
             innoSetup.setInputFile(libDir.resolve(infile).toFile());
-            innoSetup.setInputFile(libDir.resolve(outfile).toFile());
+            innoSetup.setOutputFile(libDir.resolve(outfile).toFile());
             innoSetup.setAutoStart(autoStart);
             innoSetup.setJrePath(new File(jrePath).toPath());
             innoSetup.setParameters(parameters);
