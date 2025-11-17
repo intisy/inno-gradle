@@ -12,7 +12,7 @@ Using the plugins DSL:
 
 ```groovy
 plugins {
-    id "io.github.intisy.inno-gradle" version "1.6.5.5"
+    id "io.github.intisy.inno-gradle" version "1.6.6"
 }
 ```
 
@@ -26,7 +26,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "io.github.intisy.inno-gradle:1.6.5.5"
+        classpath "io.github.intisy.inno-gradle:1.6.6"
     }
 }
 
@@ -41,9 +41,9 @@ import io.github.intisy.gradle.inno.InnoSetupTask
 tasks.register("createInstaller", InnoSetupTask) {
    infile = artifact_name + "-" + platformArch + "-obfuscated.exe"
    outfile = artifact_name + "-" + platformArch + "-installer.exe"
-   name = artifact_name
-   version = project.version
-   icon = "${projectDir}/icon.ico"
+   appName = artifact_name
+   appVersion = project.version
+   appIcon = "${projectDir}/icon.ico"
    jrePath = "${buildDir}/libs/jre"
    autoStart = true
    debug = true
