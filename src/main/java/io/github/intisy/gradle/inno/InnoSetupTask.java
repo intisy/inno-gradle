@@ -2,13 +2,9 @@ package io.github.intisy.gradle.inno;
 
 import io.github.intisy.gradle.inno.impl.InnoSetup;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.logging.LogLevel;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
-import org.gradle.api.tasks.InputDirectory;
-import org.gradle.api.tasks.PathSensitive;
-import org.gradle.api.tasks.PathSensitivity;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -224,48 +220,48 @@ public class InnoSetupTask extends DefaultTask {
      */
     @TaskAction
     public void createExe() {
-        if ((infile != null || outfile != null) && name != null && jrePath != null) {
-            try {
-                InnoSetup innoSetup = getInnoSetup();
-                LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
-                innoSetup.setDebug(debug || logLevel.equals(LogLevel.INFO) || logLevel.equals(LogLevel.DEBUG));
-                File buildDir = getProject().getLayout().getBuildDirectory().getAsFile().get();
-                Path libDir = buildDir.toPath().resolve("libs");
+        logger.debug("Initializing Inno Setup task...");
+        if (name == null) {
+            logger.error("Please define 'name'");
+            return;
+        }
 
-                if (icon != null) {
-                    File iconFile = getProject().getProjectDir().toPath().resolve(icon).toFile();
-                    innoSetup.setIconFile(iconFile);
-                }
+        try {
+            InnoSetup innoSetup = getInnoSetup();
+            File buildDir = getProject().getLayout().getBuildDirectory().getAsFile().get();
+            Path libDir = buildDir.toPath().resolve("libs");
 
-                if (version != null)
-                    innoSetup.setVersion(version);
-
-                if (infile == null) {
-                    infile = name.toLowerCase().replace(" ", "-") + ".exe";
-                }
-
-                if (outfile == null) {
-                    outfile = name.toLowerCase().replace(" ", "-") + "-installer.exe";
-                }
-
-                if (jrePath == null) {
-                    jrePath = buildDir.toPath().resolve("libs").resolve("jre").toString();
-                }
-
-                innoSetup.setName(name);
-                innoSetup.setInnoBuildPath(buildDir.toPath().resolve("inno"));
-                innoSetup.setInputFile(libDir.resolve(infile).toFile());
-                innoSetup.setInputFile(libDir.resolve(outfile).toFile());
-                innoSetup.setAutoStart(autoStart);
-                innoSetup.setJrePath(new File(jrePath).toPath());
-                innoSetup.setParameters(parameters);
-                innoSetup.setAutoStartParameters(autoStartParameters);
-                innoSetup.buildInstaller();
-            } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
+            if (icon != null) {
+                File iconFile = getProject().getProjectDir().toPath().resolve(icon).toFile();
+                innoSetup.setIconFile(iconFile);
             }
-        } else {
-            System.out.println("Please define 'fileName' and 'name' and 'jrePath'");
+
+            if (version != null)
+                innoSetup.setVersion(version);
+
+            if (infile == null) {
+                infile = name.toLowerCase().replace(" ", "-") + ".exe";
+            }
+
+            if (outfile == null) {
+                outfile = name.toLowerCase().replace(" ", "-") + "-installer.exe";
+            }
+
+            if (jrePath == null) {
+                jrePath = buildDir.toPath().resolve("libs").resolve("jre").toString();
+            }
+
+            innoSetup.setName(name);
+            innoSetup.setInnoBuildPath(buildDir.toPath().resolve("inno"));
+            innoSetup.setInputFile(libDir.resolve(infile).toFile());
+            innoSetup.setInputFile(libDir.resolve(outfile).toFile());
+            innoSetup.setAutoStart(autoStart);
+            innoSetup.setJrePath(new File(jrePath).toPath());
+            innoSetup.setParameters(parameters);
+            innoSetup.setAutoStartParameters(autoStartParameters);
+            innoSetup.buildInstaller();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
