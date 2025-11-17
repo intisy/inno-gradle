@@ -29,7 +29,6 @@ public class InnoSetup {
     private List<String> autoStartParameters;
     private List<String> parameters;
     private boolean autoStart;
-    private boolean debug;
     private final Logger logger;
 
     /**
@@ -116,15 +115,6 @@ public class InnoSetup {
     }
 
     /**
-     * Enables debug logging of the Inno Setup process output.
-     *
-     * @param debug true to print logs, false to silence
-     */
-    public void setDebug(boolean debug) {
-        this.debug = debug;
-    }
-
-    /**
      * Sets optional parameters passed to the app when launched from Startup.
      *
      * @param autoStartParameters list of parameters, or null for none
@@ -140,16 +130,6 @@ public class InnoSetup {
      */
     public void setParameters(List<String> parameters) {
         this.parameters = parameters;
-    }
-
-    /**
-     * Logs a message if debug mode is enabled.
-     *
-     * @param log message to print
-     */
-    public void log(String log) {
-        if (debug)
-            System.out.println(log);
     }
 
     /**
@@ -172,14 +152,14 @@ public class InnoSetup {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                log(line);
+                logger.debug(line);
             }
         }
         process.waitFor();
         Path outputPath = innoBuildPath.resolve("output");
         FileUtils.delete(outputFile);
         Files.copy(outputPath.resolve(outputFile.getName()), outputFile.toPath());
-        log("Process finished with exit code: " + process.exitValue());
+        logger.debug("Process finished with exit code: " + process.exitValue());
     }
 
     /**
@@ -230,6 +210,6 @@ public class InnoSetup {
         try (FileWriter writer = new FileWriter(scriptPath)) {
             writer.write(scriptContent);
         }
-        log("Inno Setup script created at: " + scriptPath);
+        logger.debug("Inno Setup script created at: " + scriptPath);
     }
 }
