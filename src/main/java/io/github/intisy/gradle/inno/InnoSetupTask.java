@@ -145,6 +145,7 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the application display name
      */
+    @Optional
     @Input
     public String getName() {
         return name;
