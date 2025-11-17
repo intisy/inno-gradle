@@ -25,23 +25,23 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class InnoSetupTask extends DefaultTask {
-    String fileName;
+    String outfile;
     String name;
     String icon;
     String version;
+    String jrePath;
     List<String> autoStartParameters;
     List<String> parameters;
-    Path jrePath;
     boolean autoStart;
     boolean debug;
 
     /**
      * Sets the file name of the application executable to package.
      *
-     * @param fileName executable file name under build/libs
+     * @param outfile executable file name under build/libs
      */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setOutfile(String outfile) {
+        this.outfile = outfile;
     }
 
     /**
@@ -94,7 +94,7 @@ public class InnoSetupTask extends DefaultTask {
      *
      * @param jrePath path to a JRE folder
      */
-    public void setJrePath(Path jrePath) {
+    public void setJrePath(String jrePath) {
         this.jrePath = jrePath;
     }
 
@@ -120,13 +120,14 @@ public class InnoSetupTask extends DefaultTask {
      * @return the executable file name to package
      */
     @Input
-    public String getFileName() {
-        return fileName;
+    public String getOutfile() {
+        return outfile;
     }
 
     /**
      * @return the application display name
      */
+    @NotNull
     @Input
     public String getName() {
         return name;
@@ -173,7 +174,7 @@ public class InnoSetupTask extends DefaultTask {
      */
     @InputDirectory
     @PathSensitive(PathSensitivity.RELATIVE)
-    public Path getJrePath() {
+    public String getJrePath() {
         return jrePath;
     }
 
@@ -201,7 +202,7 @@ public class InnoSetupTask extends DefaultTask {
      */
     @TaskAction
     public void createExe() {
-        if (fileName != null && name != null && jrePath != null) {
+        if (outfile != null && name != null && jrePath != null) {
             try {
                 InnoSetup innoSetup = getInnoSetup();
                 LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
@@ -213,7 +214,7 @@ public class InnoSetupTask extends DefaultTask {
                 if (version != null)
                     innoSetup.setVersion(version);
                 innoSetup.setAutoStart(autoStart);
-                innoSetup.setJrePath(jrePath);
+                innoSetup.setJrePath(new File(jrePath).toPath());
                 innoSetup.setParameters(parameters);
                 innoSetup.setAutoStartParameters(autoStartParameters);
                 innoSetup.buildInstaller();
@@ -231,9 +232,18 @@ public class InnoSetupTask extends DefaultTask {
      * @return configured {@code InnoSetup} instance
      * @throws IOException if build directories cannot be resolved
      */
-    private @NotNull InnoSetup getInnoSetup() throws IOException {
-        File buildDir = getProject().getBuildDir();
+    @NotNull
+    private InnoSetup getInnoSetup() throws IOException {
+        File buildDir = getProject().getLayout().getBuildDirectory().getAsFile().get();
         Path libDir = buildDir.toPath().resolve("libs");
-        return new InnoSetup(buildDir, libDir.resolve(fileName).toFile(), libDir.resolve(name.toLowerCase().replace(" ", "-") + "-installer.exe").toFile(), name);
+        Logger logger = new Logger(this, getProject());
+
+        return new InnoSetup(
+                buildDir,
+                libDir.resolve(outfile).toFile(),
+                libDir.resolve(name.toLowerCase().replace(" ", "-") + "-installer.exe").toFile(),
+                name,
+                logger
+        );
     }
 }

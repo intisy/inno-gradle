@@ -1,5 +1,7 @@
 package io.github.intisy.gradle.inno.impl;
 
+import io.github.intisy.gradle.inno.Logger;
+import io.github.intisy.gradle.inno.utils.FileUtils;
 import io.github.intisy.gradle.inno.utils.GradleUtils;
 import org.gradle.internal.impldep.com.google.gson.JsonObject;
 import org.gradle.internal.impldep.com.google.gson.JsonParser;
@@ -21,27 +23,16 @@ import java.util.zip.ZipFile;
  */
 public class GitHub {
     private final String releaseUrl;
-    private final boolean debug;
+    private final Logger logger;
 
     /**
      * Constructs a new helper for a specific GitHub releases API URL.
      *
      * @param releaseUrl GitHub API URL to query for the latest release
-     * @param debug enable verbose logging
      */
-    public GitHub(String releaseUrl, boolean debug) {
+    public GitHub(String releaseUrl, Logger logger) {
         this.releaseUrl = releaseUrl;
-        this.debug = debug;
-    }
-
-    /**
-     * Logs a message when debug is enabled.
-     *
-     * @param log message to print
-     */
-    public void log(String log) {
-        if (debug)
-            System.out.println(log);
+        this.logger = logger;
     }
 
     /**
@@ -56,19 +47,22 @@ public class GitHub {
                 Path path = GradleUtils.getGradleHome().resolve("inno").resolve(latestReleaseZip.get("tag_name").getAsString());
                 File output = path.resolve("inno.zip").toFile();
                 if (!path.toFile().exists()) {
-                    log("Downloading Inno Setup from: " + latestReleaseZip.get("zipball_url"));
-                    path.toFile().mkdirs();
-                    downloadFile(latestReleaseZip.get("zipball_url").getAsString(), output);
-                    log("Download completed.");
-                    unzipAndFlatten(output, path.toFile());
-                    log("Unzip completed to " + path);
+                    logger.debug("Downloading Inno Setup from: " + latestReleaseZip.get("zipball_url"));
+                    if (FileUtils.mkdirs(path)) {
+                        downloadFile(latestReleaseZip.get("zipball_url").getAsString(), output);
+                        logger.debug("Download completed.");
+                        unzipAndFlatten(output, path.toFile());
+                        logger.debug("Unzip completed to " + path);
+                    } else {
+                        logger.warn("Failed to create directory: " + path);
+                    }
                 }
                 return path;
             } else {
-                log("Failed to get the latest release ZIP URL.");
+                logger.warn("Failed to get the latest release ZIP URL.");
             }
         } catch (Exception e) {
-            log("Error: " + e.getMessage());
+            logger.error("Error: " + e.getMessage());
         }
         return null;
     }
@@ -82,7 +76,7 @@ public class GitHub {
      */
     public static void unzipAndFlatten(File zipFilePath, File outputDirectory) throws IOException {
         if (!outputDirectory.exists()) {
-            outputDirectory.mkdirs();
+            FileUtils.mkdirs(outputDirectory);
         }
         try (ZipFile zipFile = new ZipFile(zipFilePath)) {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -102,7 +96,9 @@ public class GitHub {
                 }
             }
         }
-        zipFilePath.delete();
+
+        if (!zipFilePath.delete())
+            throw new IOException("Failed to delete file: " + zipFilePath.getAbsolutePath());
     }
 
     /**
@@ -113,7 +109,7 @@ public class GitHub {
     private static void createDirectoriesForFile(File file) {
         File parentFile = file.getParentFile();
         if (parentFile != null && !parentFile.exists()) {
-            parentFile.mkdirs();
+            FileUtils.mkdirs(parentFile);
         }
     }
 
@@ -159,7 +155,7 @@ public class GitHub {
                 return JsonParser.parseString(response.toString()).getAsJsonObject();
             }
         } else {
-            log("Failed to get latest release info. HTTP Response Code: " + responseCode);
+            logger.warn("Failed to get latest release info. HTTP Response Code: " + responseCode);
         }
         httpConnection.disconnect();
         return null;
@@ -188,7 +184,7 @@ public class GitHub {
                 }
             }
         } else {
-            log("Failed to download file. HTTP Response Code: " + responseCode);
+            logger.warn("Failed to download file. HTTP Response Code: " + responseCode);
         }
         httpConnection.disconnect();
     }
