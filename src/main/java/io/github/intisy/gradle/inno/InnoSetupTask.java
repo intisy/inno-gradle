@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Gradle task that builds a Windows installer using Inno Setup.
  *
- * <p>Required: {@code fileName}, {@code name}, {@code jrePath}.
+ * <p>Required: {@code fileName}, {@code appName}, {@code jrePath}.
  * Optional: {@code icon}, {@code version}, {@code parameters}, {@code autoStartParameters}, {@code autoStart}, {@code debug}.
  * Produces an installer executable under the project's build directory.</p>
  */
@@ -25,7 +25,7 @@ public class InnoSetupTask extends DefaultTask {
 
     String infile;
     String outfile;
-    String name;
+    String appName;
     String icon;
     String version;
     String jrePath;
@@ -55,10 +55,10 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * Sets the application display name.
      *
-     * @param name human-readable application name
+     * @param appName human-readable application name
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     /**
@@ -147,8 +147,8 @@ public class InnoSetupTask extends DefaultTask {
      */
     @Optional
     @Input
-    public String getName() {
-        return name;
+    public String getAppName() {
+        return appName;
     }
 
     /**
@@ -221,8 +221,8 @@ public class InnoSetupTask extends DefaultTask {
     @TaskAction
     public void createExe() {
         logger.debug("Initializing Inno Setup task...");
-        if (name == null) {
-            logger.error("Please define 'name'");
+        if (appName == null) {
+            logger.error("Please define 'appName'");
             return;
         }
 
@@ -240,18 +240,18 @@ public class InnoSetupTask extends DefaultTask {
                 innoSetup.setVersion(version);
 
             if (infile == null) {
-                infile = name.toLowerCase().replace(" ", "-") + ".exe";
+                infile = appName.toLowerCase().replace(" ", "-") + ".exe";
             }
 
             if (outfile == null) {
-                outfile = name.toLowerCase().replace(" ", "-") + "-installer.exe";
+                outfile = appName.toLowerCase().replace(" ", "-") + "-installer.exe";
             }
 
             if (jrePath == null) {
                 jrePath = buildDir.toPath().resolve("libs").resolve("jre").toString();
             }
 
-            innoSetup.setName(name);
+            innoSetup.setName(appName);
             innoSetup.setInnoBuildPath(buildDir.toPath().resolve("inno"));
             innoSetup.setInputFile(libDir.resolve(infile).toFile());
             innoSetup.setInputFile(libDir.resolve(outfile).toFile());
