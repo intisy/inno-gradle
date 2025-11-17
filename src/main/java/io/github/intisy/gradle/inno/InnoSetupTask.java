@@ -21,6 +21,8 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class InnoSetupTask extends DefaultTask {
+    private final Logger logger = new Logger(this, getProject());
+
     String infile;
     String outfile;
     String name;
@@ -143,7 +145,6 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the application display name
      */
-    @NotNull
     @Input
     public String getName() {
         return name;
@@ -218,7 +219,6 @@ public class InnoSetupTask extends DefaultTask {
      */
     @TaskAction
     public void createExe() {
-        Logger logger = new Logger(this, getProject());
         logger.debug("Initializing Inno Setup task...");
         if (name == null) {
             logger.error("Please define 'name'");
@@ -272,6 +272,6 @@ public class InnoSetupTask extends DefaultTask {
      */
     @NotNull
     private InnoSetup getInnoSetup() throws IOException {
-        return new InnoSetup(new Logger(this, getProject()));
+        return new InnoSetup(logger);
     }
 }
