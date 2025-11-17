@@ -29,6 +29,7 @@ public class GitHub {
      * Constructs a new helper for a specific GitHub releases API URL.
      *
      * @param releaseUrl GitHub API URL to query for the latest release
+     * @param logger logger to use for logging messages
      */
     public GitHub(String releaseUrl, Logger logger) {
         this.releaseUrl = releaseUrl;

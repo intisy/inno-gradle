@@ -57,6 +57,7 @@ public class FileUtils {
      * Ensures a directory exists for the provided path.
      *
      * @param path directory path to create
+     * @return true if the directory was created, false if it already existed
      */
     public static boolean mkdirs(Path path) {
         return mkdirs(path.toFile());
@@ -66,6 +67,7 @@ public class FileUtils {
      * Ensures a directory exists for the provided file (as directory).
      *
      * @param file directory to create
+     * @return true if the directory was created, false if it already existed
      */
     public static boolean mkdirs(File file) {
         if (!file.exists() && !file.mkdirs()) {
