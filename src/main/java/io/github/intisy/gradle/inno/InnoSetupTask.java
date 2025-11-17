@@ -194,8 +194,8 @@ public class InnoSetupTask extends DefaultTask {
     /**
      * @return the JRE folder path to bundle
      */
-    @InputDirectory
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @Optional
+    @Input
     public String getJrePath() {
         return jrePath;
     }
@@ -246,6 +246,10 @@ public class InnoSetupTask extends DefaultTask {
 
                 if (outfile == null) {
                     outfile = name.toLowerCase().replace(" ", "-") + "-installer.exe";
+                }
+
+                if (jrePath == null) {
+                    jrePath = buildDir.toPath().resolve("libs").resolve("jre").toString();
                 }
 
                 innoSetup.setName(name);
