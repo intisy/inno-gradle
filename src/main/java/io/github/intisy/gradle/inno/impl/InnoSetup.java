@@ -200,12 +200,12 @@ public class InnoSetup {
                 "\n" +
                 "[Icons]\n" +
                 "; Create desktop shortcut\n" +
-                "Name: \"{commondesktop}\\" + name + "\"; Filename: \"{app}\\" + inputFile + "\"\n" +
-                (autoStart ? "Name: \"{userstartup}\\" + name + "\"; Filename: \"{app}\\" + inputFile + "\"; Parameters: \"/auto" + (autoStartParameters != null ? " " + String.join(" ", autoStartParameters) : "") +  "\"\n" : "") +
+                "Name: \"{commondesktop}\\" + name + "\"; Filename: \"{app}\\" + inputFile.getName() + "\"\n" +
+                (autoStart ? "Name: \"{userstartup}\\" + name + "\"; Filename: \"{app}\\" + inputFile.getName() + "\"; Parameters: \"/auto" + (autoStartParameters != null ? " " + String.join(" ", autoStartParameters) : "") +  "\"\n" : "") +
                 "\n" +
                 "[Run]\n" +
                 "; Run the application after installation\n" +
-                "Filename: \"{app}\\" + inputFile + "\"; " + (parameters != null ? "Parameters: \"" + String.join(" ", parameters) + "\"; " : "") +  "Description: \"Launch " + name + "\"; Flags: nowait postinstall skipifsilent\n";
+                "Filename: \"{app}\\" + inputFile.getName() + "\"; " + (parameters != null ? "Parameters: \"" + String.join(" ", parameters) + "\"; " : "") +  "Description: \"Launch " + name + "\"; Flags: nowait postinstall skipifsilent\n";
         FileUtils.delete(scriptPath);
         try (FileWriter writer = new FileWriter(scriptPath)) {
             writer.write(scriptContent);
