@@ -1,0 +1,14 @@
+```groovy
+import io.github.intisy.gradle.inno.InnoSetupTask
+
+tasks.register("createInstaller", InnoSetupTask) {
+   infile = artifact_name + "-" + platformArch + "-obfuscated.exe"
+   outfile = artifact_name + "-" + platformArch + "-installer.exe"
+   appName = artifact_name
+   appVersion = project.version
+   appIcon = "${projectDir}/icon.ico"
+   jrePath = "${buildDir}/libs/jre"
+   autoStart = true
+   debug = true
+}
+```

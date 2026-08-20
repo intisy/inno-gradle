@@ -3,3 +3,4 @@ build
 .gradle
 /.idea
 /test
+README.md
